@@ -6,8 +6,9 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import current_user
 
 from app import db
+from lottery.views import lottery
 from models import User
-from users.forms import RegisterForm
+from users.forms import RegisterForm, LoginForm
 
 # CONFIG
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
@@ -50,9 +51,14 @@ def register():
 
 
 # view user login
-@users_blueprint.route('/login')
+@users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        return lottery()
+
+    return render_template('login.html', form=form)
 
 
 # view user profile
