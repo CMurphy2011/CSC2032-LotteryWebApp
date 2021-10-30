@@ -16,4 +16,5 @@ class RegisterForm(FlaskForm):
 class LoginForm(FlaskForm):
     username = StringField(validators=[Required(), Email()])
     password = PasswordField(validators=[Required()])
+    #pinkey = StringField(validators=[Required()])
     submit = SubmitField()
