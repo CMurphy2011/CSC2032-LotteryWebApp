@@ -1,6 +1,7 @@
 # IMPORTS
 from flask import Blueprint, render_template, request, flash
 from app import db
+from lottery.views import draw_key
 from models import User, Draw
 
 # CONFIG
@@ -46,7 +47,7 @@ def create_winning_draw():
     submitted_draw.strip()
 
     # create a new draw object with the form data.
-    new_winning_draw = Draw(user_id=0, draw=submitted_draw, win=True, round=round)
+    new_winning_draw = Draw(user_id=0, draw=submitted_draw, win=True, round=round, draw_key=draw_key)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
