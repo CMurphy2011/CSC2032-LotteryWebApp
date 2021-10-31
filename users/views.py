@@ -5,6 +5,8 @@ from datetime import datetime
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user
 from werkzeug.security import check_password_hash
+
+import models
 from app import db
 from lottery.views import lottery
 from models import User
@@ -87,6 +89,6 @@ def account():
     return render_template('account.html',
                            acc_no="PLACEHOLDER FOR USER ID",
                            email="PLACEHOLDER FOR USER EMAIL",
-                           firstname="PLACEHOLDER FOR USER FIRSTNAME",
+                           firstname="PLACEHOLDER FOR FIRSTNAME",
                            lastname="PLACEHOLDER FOR USER LASTNAME",
                            phone="PLACEHOLDER FOR USER PHONE")
