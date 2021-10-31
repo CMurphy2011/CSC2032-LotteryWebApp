@@ -2,6 +2,7 @@
 import copy
 import logging
 from flask import Blueprint, render_template, request, flash
+from flask_login import login_required
 from sqlalchemy import desc
 from app import db
 from models import Draw, User
@@ -16,6 +17,7 @@ draw_key = user.draw_key
 # VIEWS
 # view lottery page
 @lottery_blueprint.route('/lottery')
+@login_required
 def lottery():
     return render_template('lottery.html')
 
@@ -67,9 +69,16 @@ def check_draws():
     # get played draws
     played_draws = Draw.query.filter_by(played=True).all()  # TODO: filter played draws for current user
 
+    played_draw_copies = list(map(lambda x: copy.deepcopy(x), played_draws))
+
+    decrypted_played_draws = []
+
     # if played draws exist
     if len(played_draws) != 0:
-        return render_template('lottery.html', results=played_draws, played=True)
+        for p in played_draw_copies:
+            p.view_decrypted_draws(draw_key)
+            decrypted_played_draws.append(p)
+        return render_template('lottery.html', results=decrypted_played_draws, played=True)
 
     # if no played draws exist [all draw entries have been played therefore wait for next lottery round]
     else:
