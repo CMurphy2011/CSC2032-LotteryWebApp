@@ -1,12 +1,11 @@
 # IMPORTS
 import logging
+import pyotp
 from functools import wraps
 from datetime import datetime
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
-
-import models
 from app import db
 from lottery.views import lottery
 from models import User
@@ -61,19 +60,24 @@ def login():
 
         user = User.query.filter_by(email=form.username.data).first()
 
-        if not user or not check_password_hash(user.password, form.password.data): #or not (user.pin_key == form.pinkey.data):
+        if not user or not check_password_hash(user.password, form.password.data):
             flash('Please check your login details and try again')
 
             return render_template('login.html', form=form)
 
-        login_user(user)
+        if pyotp.TOTP(user.pin_key).verify(form.pin.data):
 
-        user.last_logged_in = user.current_logged_in
-        user.current_logged_in = datetime.now()
-        db.session.add(user)
-        db.session.commit()
+            login_user(user)
 
-        return profile()
+            user.last_logged_in = user.current_logged_in
+            user.current_logged_in = datetime.now()
+            db.session.add(user)
+            db.session.commit()
+            return profile()
+
+        else:
+            flash("You have supplied an invalid 2FA token!", "danger")
+
     return render_template('login.html', form=form)
 
 

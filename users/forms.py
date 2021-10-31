@@ -18,7 +18,7 @@ class RegisterForm(FlaskForm):
     phone = StringField(validators=[Required()])
     password = PasswordField(validators=[Required(), Length(min=6, max=12, message='Password must be betweem 6 and 12 characters in length')])
     confirm_password = PasswordField(validators=[Required(), EqualTo('password', message='Both password fields must be equal')])
-    pin_key = StringField(validators=[Required()])
+    pin_key = StringField(validators=[Required(), Length(min=32, max=32, message='Pin Key must be exactly 32 characters')])
     submit = SubmitField()
 
     def validate_phone(self, phone):
@@ -26,9 +26,14 @@ class RegisterForm(FlaskForm):
         if not p.match(self.phone.data):
             raise ValidationError("Phone Number must be in format XXXX-XXX-XXXX")
 
+    def validate_password(self, password):
+        pw = re.compile(r'(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}')
+        if not pw.match(self.password.data):
+            raise ValidationError("Password must contain at least 1 Digit, 1 Lowercast Character, 1 Uppercase Character and 1 Special Character")
+
 
 class LoginForm(FlaskForm):
     username = StringField(validators=[Required(), Email()])
     password = PasswordField(validators=[Required()])
-    #pinkey = StringField(validators=[Required()])
+    pin = StringField(validators=[Required()])
     submit = SubmitField()

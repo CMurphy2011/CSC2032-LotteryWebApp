@@ -50,6 +50,7 @@
                         {{ form.password(class="input", placeholder="Password") }}
                         {% for error in form.password.errors %}
                             {{ error }}
+                            <br>
                         {% endfor %}
                     </div>
                 </div>
@@ -65,11 +66,21 @@
                 <div class="field">
                     <div class="control">
                         {{ form.pin_key(class="input", placeholder="PIN Key") }}
+                        {% for error in form.confirm_password.errors %}
+                            {{ error }}
+                        {% endfor %}
                     </div>
                     <div>
+                        <p><b>Set up time-based PIN generator</b></p>
+                        <ul>
+                            <li>Download <a href="https://authy.com/download/" target="_blank"><u>Authy</u></a> on your device.</li>
+                            <li>Select add new account.</li>
+                            <li>Enter your PIN key.</li>
+                            <li>Enter name for new account.</li>
+                            <li>Select token length of 6.</li>
+                        </ul>
                         {# TODO: Add PIN generation setup instructions #}
                     </div>
-
                 </div>
 
 
