@@ -5,6 +5,7 @@ from functools import wraps
 from flask import Flask, render_template, request
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
 
 
 # LOGGING
@@ -31,6 +32,20 @@ app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
 
 # initialise database
 db = SQLAlchemy(app)
+#talisman = Talisman(app)
+
+# SECURITY HEADERS
+csp = {
+    'default-src':[
+        '\'self\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+    'script-src': [
+        '\'self\'',
+        '\'unsafe-inline\''
+    ]
+ }
+talisman = Talisman(app, content_security_policy=csp)
 
 # FUNCTIONS
 def requires_roles(*roles):
@@ -39,20 +54,23 @@ def requires_roles(*roles):
         def wrapped(*args, **kwargs):
             if current_user.role not in roles:
                 logging.warning('SECURITY - Unauthorised access attempt [%s, %s, %s, %s]',
-                             current_user.id,
-                             current_user.username,
-                             current_user.role,
-                             request.remote_addr)
+                                current_user.id,
+                                current_user.username,
+                                current_user.role,
+                                request.remote_addr)
                 # Redirect the user to an unauthorised notice!
                 return render_template('403.html')
             return f(*args, **kwargs)
+
         return wrapped
+
     return wrapper
 
 
 # HOME PAGE VIEW
 @app.route('/')
 def index():
+    print(request.headers)
     return render_template('index.html')
 
 
@@ -87,38 +105,40 @@ def service_unavailable(error):
     return render_template('503.html'), 503
 
 
-# LOGIN MANAGER
-login_manager = LoginManager()
-login_manager.login_view = 'users.login'
-login_manager.init_app(app)
-
-from models import User
 
 
-@login_manager.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-
-
-# if __name__ == "__main__":
-# my_host = "127.0.0.1"
-# free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# free_socket.bind((my_host, 0))
-# free_socket.listen(5)
-# free_port = free_socket.getsockname()[1]
-# free_socket.close()
-
-# BLUEPRINTS
-# import blueprints
-from users.views import users_blueprint
-from admin.views import admin_blueprint
-from lottery.views import lottery_blueprint
-
-# register blueprints with app
-app.register_blueprint(users_blueprint)
-app.register_blueprint(admin_blueprint)
-app.register_blueprint(lottery_blueprint)
-
-# app.run(host=my_host, port=free_port, debug=True)
 if __name__ == "__main__":
-    app.run()
+    my_host = "127.0.0.1"
+    free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    free_socket.bind((my_host, 0))
+    free_socket.listen(5)
+    free_port = free_socket.getsockname()[1]
+    free_socket.close()
+
+    # LOGIN MANAGER
+    login_manager = LoginManager()
+    login_manager.login_view = 'users.login'
+    login_manager.init_app(app)
+
+    from models import User
+
+
+    @login_manager.user_loader
+    def load_user(id):
+        return User.query.get(int(id))
+
+
+    # BLUEPRINTS
+    # import blueprints
+    from users.views import users_blueprint
+    from admin.views import admin_blueprint
+    from lottery.views import lottery_blueprint
+
+    # register blueprints with app
+    app.register_blueprint(users_blueprint)
+    app.register_blueprint(admin_blueprint)
+    app.register_blueprint(lottery_blueprint)
+
+    # app.run(host=my_host, port=free_port, debug=True)
+    # if __name__ == "__main__":
+    app.run(host=my_host, port=free_port, debug=True, ssl_context=('cert.pem', 'key.pem'))
