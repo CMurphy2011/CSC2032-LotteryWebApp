@@ -1,3 +1,7 @@
+### NOTES - some conflict with draw_key/current_user causing current_user to display as None
+### Fix is likely to do with current_user, as once that works, it should be able to get the draw_key
+
+
 # IMPORTS
 import logging
 import pyotp
@@ -84,18 +88,18 @@ def login():
 # view user profile
 @users_blueprint.route('/profile')
 def profile():
-    return render_template('profile.html', name="PLACEHOLDER FOR FIRSTNAME")
+    return render_template('profile.html', name=current_user.firstname)
 
 
 # view user account
 @users_blueprint.route('/account')
 def account():
     return render_template('account.html',
-                           acc_no="PLACEHOLDER FOR USER ID",
-                           email="PLACEHOLDER FOR USER EMAIL",
-                           firstname="PLACEHOLDER FOR FIRSTNAME",
-                           lastname="PLACEHOLDER FOR USER LASTNAME",
-                           phone="PLACEHOLDER FOR USER PHONE")
+                           acc_no=current_user.id,
+                           email=current_user.email,
+                           firstname=current_user.firstname,
+                           lastname=current_user.lastname,
+                           phone=current_user.phone)
 
 @users_blueprint.route('/logout')
 def logout():

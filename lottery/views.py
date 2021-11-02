@@ -2,7 +2,7 @@
 import copy
 import logging
 from flask import Blueprint, render_template, request, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy import desc
 from app import db
 from models import Draw, User
@@ -10,8 +10,8 @@ from models import Draw, User
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 
-user = User.query.first()
-draw_key = user.draw_key
+Auser = User.query.first()
+Adraw_key = Auser.draw_key
 
 
 # VIEWS
@@ -30,7 +30,8 @@ def add_draw():
     submitted_draw.strip()
 
     # create a new draw with the form data.
-    new_draw = Draw(user_id=1, draw=submitted_draw, win=False, round=0, draw_key=draw_key)  # TODO: update user_id [user_id=1 is a placeholder]
+    print(current_user)
+    new_draw = Draw(user_id=current_user.id, draw=submitted_draw, win=False, round=0, draw_key=current_user.draw_key)  # TODO: update user_id [user_id=1 is a placeholder]
 
     # add the new draw to the database
     db.session.add(new_draw)
@@ -45,7 +46,7 @@ def add_draw():
 @lottery_blueprint.route('/view_draws', methods=['POST'])
 def view_draws():
     # get all draws that have not been played [played=0]
-    playable_draws = Draw.query.filter_by(played=False).all()# TODO: filter playable draws for current user
+    playable_draws = Draw.query.filter_by(played=False, user_id=current_user.id).all()# TODO: filter playable draws for current user
 
     draw_copies = list(map(lambda x: copy.deepcopy(x), playable_draws))
 
@@ -54,7 +55,9 @@ def view_draws():
     # if playable draws exist
     if len(playable_draws) != 0:
         for d in draw_copies:
-            d.view_decrypted_draws(draw_key)
+            user = current_user.query.filter_by(id=d.user_id).first()
+            print(user)
+            d.view_decrypted_draws(user.draw_key)
             decrypted_draws.append(d)
         # re-render lottery page with playable draws
         return render_template('lottery.html', playable_draws=decrypted_draws)
@@ -76,7 +79,8 @@ def check_draws():
     # if played draws exist
     if len(played_draws) != 0:
         for p in played_draw_copies:
-            p.view_decrypted_draws(draw_key)
+            user = current_user.query.filter_by(id=p.user_id).first()
+            p.view_decrypted_draws(user.draw_key)
             decrypted_played_draws.append(p)
         return render_template('lottery.html', results=decrypted_played_draws, played=True)
 

@@ -3,11 +3,12 @@ import copy
 
 from flask import Blueprint, render_template, request, flash
 from app import db
-from lottery.views import draw_key
 from models import User, Draw
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
+superuser = User.query.first()
+superuser_draw_key = superuser.draw_key
 
 
 # VIEWS
@@ -49,7 +50,7 @@ def create_winning_draw():
     submitted_draw.strip()
 
     # create a new draw object with the form data.
-    new_winning_draw = Draw(user_id=0, draw=submitted_draw, win=True, round=round, draw_key=draw_key)
+    new_winning_draw = Draw(user_id=0, draw=submitted_draw, win=True, round=round, draw_key=superuser_draw_key)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
@@ -71,7 +72,7 @@ def view_winning_draw():
 
     # if a winning draw exists
     if current_winning_draw:
-        winning_draw_copy.view_decrypted_draws(draw_key)
+        winning_draw_copy.view_decrypted_draws(superuser_draw_key)
         # re-render admin page with current winning draw and lottery round
         return render_template('admin.html', winning_draw=winning_draw_copy, name="PLACEHOLDER FOR FIRSTNAME")
 
