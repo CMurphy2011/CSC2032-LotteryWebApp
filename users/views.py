@@ -1,7 +1,3 @@
-### NOTES - some conflict with draw_key/current_user causing current_user to display as None
-### Fix is likely to do with current_user, as once that works, it should be able to get the draw_key
-
-
 # IMPORTS
 import logging
 import pyotp
@@ -49,6 +45,8 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        logging.warning('SECURITY - User registration [%s, %s]', form.email.data, request.remote_addr)
+
         # sends user to login page
         return redirect(url_for('users.login'))
     # if request method is GET or form not valid re-render signup page
@@ -77,6 +75,9 @@ def login():
             user.current_logged_in = datetime.now()
             db.session.add(user)
             db.session.commit()
+
+            logging.warning('SECURITY - Log in [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
+
             return profile()
 
         else:
@@ -91,6 +92,7 @@ def profile():
     return render_template('profile.html', name=current_user.firstname)
 
 
+
 # view user account
 @users_blueprint.route('/account')
 def account():
@@ -103,5 +105,8 @@ def account():
 
 @users_blueprint.route('/logout')
 def logout():
+
+    logging.warning('SECURITY - Log out [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
+
     logout_user()
     return redirect(url_for('index'))
