@@ -10,9 +10,6 @@ from models import Draw, User
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
 
-Auser = User.query.first()
-Adraw_key = Auser.draw_key
-
 
 # VIEWS
 # view lottery page
@@ -34,7 +31,7 @@ def add_draw():
 
     # create a new draw with the form data.
     print(current_user)
-    new_draw = Draw(user_id=current_user.id, draw=submitted_draw, win=False, round=0, draw_key=current_user.draw_key)  # TODO: update user_id [user_id=1 is a placeholder]
+    new_draw = Draw(user_id=current_user.id, draw=submitted_draw, win=False, round=0, draw_key=current_user.draw_key)
 
     # add the new draw to the database
     db.session.add(new_draw)
@@ -51,7 +48,7 @@ def add_draw():
 @requires_roles('user')
 def view_draws():
     # get all draws that have not been played [played=0]
-    playable_draws = Draw.query.filter_by(played=False, user_id=current_user.id).all()# TODO: filter playable draws for current user
+    playable_draws = Draw.query.filter_by(played=False, user_id=current_user.id).all()
 
     draw_copies = list(map(lambda x: copy.deepcopy(x), playable_draws))
 
@@ -77,7 +74,7 @@ def view_draws():
 @requires_roles('user')
 def check_draws():
     # get played draws
-    played_draws = Draw.query.filter_by(played=True, user_id=current_user.id).all()  # TODO: filter played draws for current user
+    played_draws = Draw.query.filter_by(played=True, user_id=current_user.id).all()
 
     played_draw_copies = list(map(lambda x: copy.deepcopy(x), played_draws))
 
@@ -102,7 +99,7 @@ def check_draws():
 @login_required
 @requires_roles('user')
 def play_again():
-    delete_played = Draw.__table__.delete().where(Draw.played, Draw.user_id == current_user.id)  # TODO: delete played draws for current user only
+    delete_played = Draw.__table__.delete().where(Draw.played, Draw.user_id == current_user.id)
     db.session.execute(delete_played)
     db.session.commit()
 

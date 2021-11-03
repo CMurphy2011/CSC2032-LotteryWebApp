@@ -71,7 +71,10 @@ def requires_roles(*roles):
 @app.route('/')
 def index():
     print(request.headers)
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        return render_template('index.html', firstname=current_user.firstname, id=current_user.id)
+    else:
+        return render_template('index.html')
 
 
 # ERROR PAGE VIEWS
