@@ -5,6 +5,8 @@ from datetime import datetime
 from flask import Blueprint, render_template, flash, redirect, url_for,session, request
 from flask_login import current_user, login_user, logout_user
 from werkzeug.security import check_password_hash
+
+from admin.views import admin
 from app import db
 from models import User
 from users.forms import RegisterForm, LoginForm
@@ -97,7 +99,11 @@ def login():
 
             logging.warning('SECURITY - Log in [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
 
-            return profile()
+            if current_user.role == 'admin':
+                return admin()
+
+            else:
+                return profile()
 
         else:
             flash("You have supplied an invalid 2FA token!", "danger")
