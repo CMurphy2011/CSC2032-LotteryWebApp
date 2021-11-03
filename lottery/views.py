@@ -1,11 +1,9 @@
 # IMPORTS
 import copy
-import logging
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required, current_user
-from sqlalchemy import desc
 from app import db, requires_roles
-from models import Draw, User
+from models import Draw
 
 # CONFIG
 lottery_blueprint = Blueprint('lottery', __name__, template_folder='templates')
