@@ -112,15 +112,19 @@ def run_lottery():
             db.session.add(current_winning_draw)
             db.session.commit()
 
+            decrypted_winning_draw=current_winning_draw.view_decrypted_draws(superuser_draw_key)
+
             # for each unplayed user draw
             for draw in user_draws:
 
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
 
-                # if user draw matches current unplayed winning draw
-                if draw.draw == current_winning_draw.draw:
+                # decrypt the current user draw
+                decrypted_user_draw = draw.view_decrypted_draws(user.draw_key)
 
+                # if user draw matches current unplayed winning draw
+                if decrypted_user_draw == decrypted_winning_draw:
                     # add details of winner to list of results
                     results.append((current_winning_draw.round, draw.draw, draw.user_id, user.email))
 
