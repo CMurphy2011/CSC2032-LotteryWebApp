@@ -1,0 +1,4 @@
+11/05/2021 04:20:15 AM : SECURITY - Log out [1, admin@email.com, 127.0.0.1]
+11/05/2021 04:20:42 AM : SECURITY - Log in [3, carol@email.com, 127.0.0.1]
+11/05/2021 04:20:48 AM : SECURITY - Log out [3, carol@email.com, 127.0.0.1]
+11/05/2021 04:21:00 AM : SECURITY - Log in [1, admin@email.com, 127.0.0.1]

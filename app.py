@@ -32,7 +32,6 @@ app.config['SECRET_KEY'] = 'LongAndRandomSecretKey'
 
 # initialise database
 db = SQLAlchemy(app)
-#talisman = Talisman(app)
 
 # SECURITY HEADERS
 csp = {
@@ -142,6 +141,4 @@ if __name__ == "__main__":
     app.register_blueprint(admin_blueprint)
     app.register_blueprint(lottery_blueprint)
 
-    # app.run(host=my_host, port=free_port, debug=True)
-    # if __name__ == "__main__":
     app.run(host=my_host, port=free_port, debug=True, ssl_context=('cert.pem', 'key.pem'))
