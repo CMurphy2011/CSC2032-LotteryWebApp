@@ -1,8 +1,10 @@
 # IMPORTS
+import copy
+
 from flask import Blueprint, render_template, request, flash
 from flask_login import login_required
 from app import db, requires_roles
-from models import User, Draw
+from models import User, Draw, encrypt
 
 # CONFIG
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
@@ -33,7 +35,6 @@ def view_all_users():
 @login_required
 @requires_roles('admin')
 def create_winning_draw():
-
     # get current winning draw
     current_winning_draw = Draw.query.filter_by(win=True).first()
     round = 1
@@ -71,7 +72,6 @@ def create_winning_draw():
 @login_required
 @requires_roles('admin')
 def view_winning_draw():
-
     # get winning draw from DB
     current_winning_draw = Draw.query.filter_by(win=True).first()
 
@@ -93,7 +93,6 @@ def view_winning_draw():
 @login_required
 @requires_roles('admin')
 def run_lottery():
-
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(win=True, played=False).first()
 
@@ -101,6 +100,7 @@ def run_lottery():
     if current_winning_draw:
 
         # get all unplayed user draws
+        saved_winning_draw = current_winning_draw.draw
         user_draws = Draw.query.filter_by(win=False, played=False).all()
         results = []
 
@@ -109,22 +109,24 @@ def run_lottery():
 
             # update current winning draw as played
             current_winning_draw.played = True
-            db.session.add(current_winning_draw)
-            db.session.commit()
 
-            decrypted_winning_draw=current_winning_draw.view_decrypted_draws(superuser_draw_key)
+            current_winning_draw.view_decrypted_draws(superuser_draw_key)
 
             # for each unplayed user draw
             for draw in user_draws:
 
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
+                saved_draw = draw.draw
 
                 # decrypt the current user draw
-                decrypted_user_draw = draw.view_decrypted_draws(user.draw_key)
+                draw.view_decrypted_draws(user.draw_key)
 
                 # if user draw matches current unplayed winning draw
-                if decrypted_user_draw == decrypted_winning_draw:
+                if draw.draw == current_winning_draw.draw:
+                    current_winning_draw.draw = saved_winning_draw
+                    draw.win = True
+
                     # add details of winner to list of results
                     results.append((current_winning_draw.round, draw.draw, draw.user_id, user.email))
 
@@ -138,7 +140,12 @@ def run_lottery():
                 # update draw with current lottery round
                 draw.round = current_winning_draw.round
 
+                # re-assign encrypted draw values
+                draw.draw = saved_draw
+                current_winning_draw.draw = saved_winning_draw
+
                 # commit draw changes to DB
+                db.session.add(current_winning_draw)
                 db.session.add(draw)
                 db.session.commit()
 
