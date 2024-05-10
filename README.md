@@ -1,9 +1,9 @@
 LotteryWebApp
 ============
-CSC2031
+CSC2031 - Systems Security
 -------
-Simple web application used for an online lottery  
-  
-It has been used to demonstrate several vital security development principles  
+A simple web application developed for an online lottery.
 
-Github repo: https://github.com/CMurphy2011/CSC2032-LotteryWebApp
+Developed for an assignment in my second year of university to demonstrate several key security principles.
+
+1st class recieved for this module due to this work.
